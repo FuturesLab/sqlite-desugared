@@ -4845,10 +4845,10 @@ int sqlite3PagerOpen(
     pPager->zJournal = (char*)pPtr;
     memcpy(pPtr, zPathname, nPathname);   pPtr += nPathname;
     memcpy(pPtr, "-journal",8);           pPtr += 8 + 1;
-#ifdef SQLITE_ENABLE_8_3_NAMES
+if (getenv("SQLITE_ENABLE_8_3_NAMES")){
     sqlite3FileSuffix3(zFilename,pPager->zJournal);
     pPtr = (u8*)(pPager->zJournal + sqlite3Strlen30(pPager->zJournal)+1);
-#endif
+}
   }else{
     pPager->zJournal = 0;
   }
@@ -4859,10 +4859,10 @@ int sqlite3PagerOpen(
     pPager->zWal = (char*)pPtr;
     memcpy(pPtr, zPathname, nPathname);   pPtr += nPathname;
     memcpy(pPtr, "-wal", 4);              pPtr += 4 + 1;
-#ifdef SQLITE_ENABLE_8_3_NAMES
+if (getenv("SQLITE_ENABLE_8_3_NAMES")){
     sqlite3FileSuffix3(zFilename, pPager->zWal);
     pPtr = (u8*)(pPager->zWal + sqlite3Strlen30(pPager->zWal)+1);
-#endif
+}
   }else{
     pPager->zWal = 0;
   }

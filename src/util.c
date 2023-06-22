@@ -1528,7 +1528,6 @@ int sqlite3AbsInt32(int x){
   return -x;
 }
 
-#ifdef SQLITE_ENABLE_8_3_NAMES
 /*
 ** If SQLITE_ENABLE_8_3_NAMES is set at compile-time and if the database
 ** filename in zBaseFilename is a URI with the "8_3_names=1" parameter and
@@ -1547,6 +1546,8 @@ int sqlite3AbsInt32(int x){
 **     test.db-mj7f3319fa =>   test.9fa
 */
 void sqlite3FileSuffix3(const char *zBaseFilename, char *z){
+if (!getenv("SQLITE_ENABLE_8_3_NAMES")) return;
+assert(getenv("SQLITE_ENABLE_8_3_NAMES"));
 #if SQLITE_ENABLE_8_3_NAMES<2
   if( sqlite3_uri_boolean(zBaseFilename, "8_3_names", 0) )
 #endif
@@ -1557,7 +1558,6 @@ void sqlite3FileSuffix3(const char *zBaseFilename, char *z){
     if( z[i]=='.' && ALWAYS(sz>i+4) ) memmove(&z[i+1], &z[sz-3], 4);
   }
 }
-#endif
 
 /*
 ** Find (an approximate) sum of two LogEst values.  This computation is
