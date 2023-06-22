@@ -5024,9 +5024,7 @@ static int accessPayload(
   int iIdx = 0;
   MemPage *pPage = pCur->pPage;               /* Btree page of current entry */
   BtShared *pBt = pCur->pBt;                  /* Btree this cursor belongs to */
-#ifdef SQLITE_DIRECT_OVERFLOW_READ
   unsigned char * const pBufStart = pBuf;     /* Start of original out buffer */
-#endif
 
   assert( pPage );
   assert( eOp==0 || eOp==1 );
@@ -5139,7 +5137,6 @@ static int accessPayload(
           a = ovflSize - offset;
         }
 
-#ifdef SQLITE_DIRECT_OVERFLOW_READ
         /* If all the following are true:
         **
         **   1) this is a read operation, and
@@ -5153,7 +5150,8 @@ static int accessPayload(
         ** output buffer, bypassing the page-cache altogether. This speeds
         ** up loading large records that span many overflow pages.
         */
-        if( eOp==0                                             /* (1) */
+        if( getenv("SQLITE_DIRECT_OVERFLOW_READ")
+         && eOp==0                                             /* (1) */
          && offset==0                                          /* (2) */
          && sqlite3PagerDirectReadOk(pBt->pPager, nextPage)    /* (3,4,5) */
          && &pBuf[-4]>=pBufStart                               /* (6) */
@@ -5168,7 +5166,6 @@ static int accessPayload(
           nextPage = get4byte(aWrite);
           memcpy(aWrite, aSave, 4);
         }else
-#endif
 
         {
           DbPage *pDbPage;
