@@ -2967,7 +2967,7 @@ int sqlite3ParseUri(
     zFile += 4;
 
     iIn = 5;
-#ifdef SQLITE_ALLOW_URI_AUTHORITY
+if (getenv("SQLITE_ALLOW_URI_AUTHORITY")){
     if( strncmp(zUri+5, "///", 3)==0 ){
       iIn = 7;
       /* The following condition causes URIs with five leading / characters
@@ -2979,7 +2979,8 @@ int sqlite3ParseUri(
     }else if( strncmp(zUri+5, "//localhost/", 12)==0 ){
       iIn = 16;
     }
-#else
+}
+else{
     /* Discard the scheme and authority segments of the URI. */
     if( zUri[5]=='/' && zUri[6]=='/' ){
       iIn = 7;
@@ -2991,7 +2992,7 @@ int sqlite3ParseUri(
         goto parse_uri_out;
       }
     }
-#endif
+}
 
     /* Copy the filename and any query parameters into the zFile buffer.
     ** Decode %HH escape codes along the way.
