@@ -136,17 +136,17 @@ int sqlite3_blob_open(
   Incrblob *pBlob = 0;
   Parse sParse;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( ppBlob==0 ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   *ppBlob = 0;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) || zTable==0 ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   wrFlag = !!wrFlag;                /* wrFlag = (wrFlag ? 1 : 0); */
 
   sqlite3_mutex_enter(db->mutex);

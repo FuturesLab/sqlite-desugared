@@ -1338,12 +1338,12 @@ void sqlite3_win32_write_debug(const char *zBuf, int nBuf){
   int nMin = MIN(nBuf, (SQLITE_WIN32_DBG_BUF_SIZE - 1)); /* may be negative. */
   if( nMin<-1 ) nMin = -1; /* all negative values become -1. */
   assert( nMin==-1 || nMin==0 || nMin<SQLITE_WIN32_DBG_BUF_SIZE );
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zBuf ){
     (void)SQLITE_MISUSE_BKPT;
     return;
   }
-#endif
+}
 #if defined(SQLITE_WIN32_HAS_ANSI)
   if( nMin>0 ){
     memset(zDbgBuf, 0, SQLITE_WIN32_DBG_BUF_SIZE);
@@ -1817,12 +1817,12 @@ static char *winUtf8ToMbcs(const char *zText, int useAnsi){
 ** This is a public wrapper for the winUtf8ToUnicode() function.
 */
 LPWSTR sqlite3_win32_utf8_to_unicode(const char *zText){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zText ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif
@@ -1833,12 +1833,12 @@ LPWSTR sqlite3_win32_utf8_to_unicode(const char *zText){
 ** This is a public wrapper for the winUnicodeToUtf8() function.
 */
 char *sqlite3_win32_unicode_to_utf8(LPCWSTR zWideText){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zWideText ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif
@@ -1849,12 +1849,12 @@ char *sqlite3_win32_unicode_to_utf8(LPCWSTR zWideText){
 ** This is a public wrapper for the winMbcsToUtf8() function.
 */
 char *sqlite3_win32_mbcs_to_utf8(const char *zText){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zText ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif
@@ -1865,12 +1865,12 @@ char *sqlite3_win32_mbcs_to_utf8(const char *zText){
 ** This is a public wrapper for the winMbcsToUtf8() function.
 */
 char *sqlite3_win32_mbcs_to_utf8_v2(const char *zText, int useAnsi){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zText ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif
@@ -1881,12 +1881,12 @@ char *sqlite3_win32_mbcs_to_utf8_v2(const char *zText, int useAnsi){
 ** This is a public wrapper for the winUtf8ToMbcs() function.
 */
 char *sqlite3_win32_utf8_to_mbcs(const char *zText){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zText ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif
@@ -1897,12 +1897,12 @@ char *sqlite3_win32_utf8_to_mbcs(const char *zText){
 ** This is a public wrapper for the winUtf8ToMbcs() function.
 */
 char *sqlite3_win32_utf8_to_mbcs_v2(const char *zText, int useAnsi){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !zText ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif

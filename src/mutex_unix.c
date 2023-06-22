@@ -40,9 +40,7 @@
 */
 struct sqlite3_mutex {
   pthread_mutex_t mutex;     /* Mutex controlling the lock */
-#if SQLITE_MUTEX_NREF || defined(SQLITE_ENABLE_API_ARMOR)
   int id;                    /* Mutex type */
-#endif
 #if SQLITE_MUTEX_NREF
   volatile int nRef;         /* Number of entrances */
   volatile pthread_t owner;  /* Thread that is within this mutex */
@@ -182,9 +180,9 @@ static sqlite3_mutex *pthreadMutexAlloc(int iType){
         pthread_mutex_init(&p->mutex, &recursiveAttr);
         pthread_mutexattr_destroy(&recursiveAttr);
 #endif
-#if SQLITE_MUTEX_NREF || defined(SQLITE_ENABLE_API_ARMOR)
+if (getenv("SQLITE_ENABLE_API_ARMOR") || SQLITE_MUTEX_NREF){
         p->id = SQLITE_MUTEX_RECURSIVE;
-#endif
+}
       }
       break;
     }
@@ -192,26 +190,26 @@ static sqlite3_mutex *pthreadMutexAlloc(int iType){
       p = sqlite3MallocZero( sizeof(*p) );
       if( p ){
         pthread_mutex_init(&p->mutex, 0);
-#if SQLITE_MUTEX_NREF || defined(SQLITE_ENABLE_API_ARMOR)
+if (getenv("SQLITE_ENABLE_API_ARMOR") || SQLITE_MUTEX_NREF){
         p->id = SQLITE_MUTEX_FAST;
-#endif
+}
       }
       break;
     }
     default: {
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
       if( iType-2<0 || iType-2>=ArraySize(staticMutexes) ){
         (void)SQLITE_MISUSE_BKPT;
         return 0;
       }
-#endif
+}
       p = &staticMutexes[iType-2];
       break;
     }
   }
-#if SQLITE_MUTEX_NREF || defined(SQLITE_ENABLE_API_ARMOR)
+if (getenv("SQLITE_ENABLE_API_ARMOR") || SQLITE_MUTEX_NREF){
   assert( p==0 || p->id==iType );
-#endif
+}
   return p;
 }
 
@@ -223,18 +221,14 @@ static sqlite3_mutex *pthreadMutexAlloc(int iType){
 */
 static void pthreadMutexFree(sqlite3_mutex *p){
   assert( p->nRef==0 );
-#if SQLITE_ENABLE_API_ARMOR
-  if( p->id==SQLITE_MUTEX_FAST || p->id==SQLITE_MUTEX_RECURSIVE )
-#endif
+  if( getenv("SQLITE_ENABLE_API_ARMOR") || p->id==SQLITE_MUTEX_FAST || p->id==SQLITE_MUTEX_RECURSIVE )
   {
     pthread_mutex_destroy(&p->mutex);
     sqlite3_free(p);
   }
-#ifdef SQLITE_ENABLE_API_ARMOR
-  else{
+  else if (getenv("SQLITE_ENABLE_API_ARMOR")){
     (void)SQLITE_MISUSE_BKPT;
   }
-#endif
 }
 
 /*

@@ -842,9 +842,9 @@ static int sqlite3LockAndPrepare(
   int rc;
   int cnt = 0;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( ppStmt==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   *ppStmt = 0;
   if( !sqlite3SafetyCheckOk(db)||zSql==0 ){
     return SQLITE_MISUSE_BKPT;
@@ -990,9 +990,9 @@ static int sqlite3Prepare16(
   const char *zTail8 = 0;
   int rc = SQLITE_OK;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( ppStmt==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   *ppStmt = 0;
   if( !sqlite3SafetyCheckOk(db)||zSql==0 ){
     return SQLITE_MISUSE_BKPT;

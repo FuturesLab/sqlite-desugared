@@ -232,12 +232,12 @@ static sqlite3_mutex *winMutexAlloc(int iType){
       break;
     }
     default: {
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
       if( iType-2<0 || iType-2>=ArraySize(winMutex_staticMutexes) ){
         (void)SQLITE_MISUSE_BKPT;
         return 0;
       }
-#endif
+}
       p = &winMutex_staticMutexes[iType-2];
 #ifdef SQLITE_DEBUG
 #ifdef SQLITE_WIN32_MUTEX_TRACE_STATIC
@@ -264,9 +264,9 @@ static void winMutexFree(sqlite3_mutex *p){
     DeleteCriticalSection(&p->mutex);
     sqlite3_free(p);
   }else{
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
     (void)SQLITE_MISUSE_BKPT;
-#endif
+}
   }
 }
 

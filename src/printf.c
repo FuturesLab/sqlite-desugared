@@ -1314,12 +1314,12 @@ char *sqlite3_vmprintf(const char *zFormat, va_list ap){
   char zBase[SQLITE_PRINT_BUF_SIZE];
   StrAccum acc;
 
-#ifdef SQLITE_ENABLE_API_ARMOR  
+if (getenv("SQLITE_ENABLE_API_ARMOR")){ 
   if( zFormat==0 ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 #ifndef SQLITE_OMIT_AUTOINIT
   if( sqlite3_initialize() ) return 0;
 #endif
@@ -1361,13 +1361,13 @@ char *sqlite3_mprintf(const char *zFormat, ...){
 char *sqlite3_vsnprintf(int n, char *zBuf, const char *zFormat, va_list ap){
   StrAccum acc;
   if( n<=0 ) return zBuf;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( zBuf==0 || zFormat==0 ) {
     (void)SQLITE_MISUSE_BKPT;
     if( zBuf ) zBuf[0] = 0;
     return zBuf;
   }
-#endif
+}
   sqlite3StrAccumInit(&acc, 0, zBuf, n, 0);
   sqlite3_str_vappendf(&acc, zFormat, ap);
   zBuf[acc.nChar] = 0;
@@ -1377,13 +1377,13 @@ char *sqlite3_snprintf(int n, char *zBuf, const char *zFormat, ...){
   StrAccum acc;
   va_list ap;
   if( n<=0 ) return zBuf;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( zBuf==0 || zFormat==0 ) {
     (void)SQLITE_MISUSE_BKPT;
     if( zBuf ) zBuf[0] = 0;
     return zBuf;
   }
-#endif
+}
   sqlite3StrAccumInit(&acc, 0, zBuf, n, 0);
   va_start(ap,zFormat);
   sqlite3_str_vappendf(&acc, zFormat, ap);

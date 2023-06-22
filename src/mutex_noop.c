@@ -120,12 +120,12 @@ static sqlite3_mutex *debugMutexAlloc(int id){
       break;
     }
     default: {
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
       if( id-2<0 || id-2>=ArraySize(aStatic) ){
         (void)SQLITE_MISUSE_BKPT;
         return 0;
       }
-#endif
+}
       pNew = &aStatic[id-2];
       pNew->id = id;
       break;
@@ -143,9 +143,9 @@ static void debugMutexFree(sqlite3_mutex *pX){
   if( p->id==SQLITE_MUTEX_RECURSIVE || p->id==SQLITE_MUTEX_FAST ){
     sqlite3_free(p);
   }else{
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
     (void)SQLITE_MISUSE_BKPT;
-#endif
+}
   }
 }
 

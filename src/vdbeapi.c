@@ -1325,12 +1325,12 @@ static const void *columnName(
   Vdbe *p;
   int n;
   sqlite3 *db;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( pStmt==0 ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   ret = 0;
   p = (Vdbe *)pStmt;
   db = p->db;
@@ -1543,9 +1543,9 @@ int sqlite3_bind_blob(
   int nData,
   void (*xDel)(void*)
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( nData<0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   return bindText(pStmt, i, zData, nData, xDel, 0);
 }
 int sqlite3_bind_blob64(
@@ -1830,12 +1830,12 @@ int sqlite3_stmt_busy(sqlite3_stmt *pStmt){
 */
 sqlite3_stmt *sqlite3_next_stmt(sqlite3 *pDb, sqlite3_stmt *pStmt){
   sqlite3_stmt *pNext;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(pDb) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(pDb->mutex);
   if( pStmt==0 ){
     pNext = (sqlite3_stmt*)pDb->pVdbe;
@@ -1852,14 +1852,14 @@ sqlite3_stmt *sqlite3_next_stmt(sqlite3 *pDb, sqlite3_stmt *pStmt){
 int sqlite3_stmt_status(sqlite3_stmt *pStmt, int op, int resetFlag){
   Vdbe *pVdbe = (Vdbe*)pStmt;
   u32 v;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !pStmt
    || (op!=SQLITE_STMTSTATUS_MEMUSED && (op<0||op>=ArraySize(pVdbe->aCounter)))
   ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   if( op==SQLITE_STMTSTATUS_MEMUSED ){
     sqlite3 *db = pVdbe->db;
     sqlite3_mutex_enter(db->mutex);

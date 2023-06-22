@@ -103,12 +103,12 @@ static sqlite3_mutex *checkMutexAlloc(int iType){
     if( p==0 ) return 0;
     p->iType = iType;
   }else{
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
     if( iType-2>=ArraySize(staticMutexes) ){
       (void)SQLITE_MISUSE_BKPT;
       return 0;
     }
-#endif
+}
     p = &staticMutexes[iType-2];
   }
 
@@ -133,19 +133,19 @@ static void checkMutexFree(sqlite3_mutex *p){
   assert( SQLITE_MUTEX_FAST<2 );
   assert( SQLITE_MUTEX_WARNONCONTENTION<2 );
 
-#if SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( ((CheckMutex*)p)->iType<2 )
-#endif
+}
   {
     CheckMutex *pCheck = (CheckMutex*)p;
     pGlobalMutexMethods->xMutexFree(pCheck->mutex);
     sqlite3_free(pCheck);
   }
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   else{
     (void)SQLITE_MISUSE_BKPT;
   }
-#endif
+}
 }
 
 /*

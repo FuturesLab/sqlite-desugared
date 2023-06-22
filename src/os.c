@@ -411,9 +411,9 @@ int sqlite3_vfs_register(sqlite3_vfs *pVfs, int makeDflt){
   int rc = sqlite3_initialize();
   if( rc ) return rc;
 #endif
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( pVfs==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
 
   MUTEX_LOGIC( mutex = sqlite3MutexAlloc(SQLITE_MUTEX_STATIC_MAIN); )
   sqlite3_mutex_enter(mutex);

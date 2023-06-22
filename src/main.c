@@ -850,12 +850,12 @@ static int setupLookaside(sqlite3 *db, void *pBuf, int sz, int cnt){
 ** Return the mutex associated with a database connection.
 */
 sqlite3_mutex *sqlite3_db_mutex(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   return db->mutex;
 }
 
@@ -866,9 +866,9 @@ sqlite3_mutex *sqlite3_db_mutex(sqlite3 *db){
 int sqlite3_db_release_memory(sqlite3 *db){
   int i;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   sqlite3BtreeEnterAll(db);
   for(i=0; i<db->nDb; i++){
@@ -892,9 +892,9 @@ int sqlite3_db_cacheflush(sqlite3 *db){
   int rc = SQLITE_OK;
   int bSeenBusy = 0;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   sqlite3BtreeEnterAll(db);
   for(i=0; rc==SQLITE_OK && i<db->nDb; i++){
@@ -1065,12 +1065,12 @@ static int nocaseCollatingFunc(
 ** Return the ROWID of the most recent insert
 */
 sqlite_int64 sqlite3_last_insert_rowid(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   return db->lastRowid;
 }
 
@@ -1078,12 +1078,12 @@ sqlite_int64 sqlite3_last_insert_rowid(sqlite3 *db){
 ** Set the value returned by the sqlite3_last_insert_rowid() API function.
 */
 void sqlite3_set_last_insert_rowid(sqlite3 *db, sqlite3_int64 iRowid){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   db->lastRowid = iRowid;
   sqlite3_mutex_leave(db->mutex);
@@ -1093,12 +1093,12 @@ void sqlite3_set_last_insert_rowid(sqlite3 *db, sqlite3_int64 iRowid){
 ** Return the number of changes in the most recent call to sqlite3_exec().
 */
 sqlite3_int64 sqlite3_changes64(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   return db->nChange;
 }
 int sqlite3_changes(sqlite3 *db){
@@ -1109,12 +1109,12 @@ int sqlite3_changes(sqlite3 *db){
 ** Return the number of changes since the database handle was opened.
 */
 sqlite3_int64 sqlite3_total_changes64(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   return db->nTotalChange;
 }
 int sqlite3_total_changes(sqlite3 *db){
@@ -1262,12 +1262,12 @@ static int sqlite3Close(sqlite3 *db, int forceZombie){
 int sqlite3_txn_state(sqlite3 *db, const char *zSchema){
   int iDb, nDb;
   int iTxn = -1;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return -1;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   if( zSchema ){
     nDb = iDb = sqlite3FindDbName(db, zSchema);
@@ -1734,9 +1734,9 @@ int sqlite3_busy_handler(
   int (*xBusy)(void*,int),
   void *pArg
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   db->busyHandler.xBusyHandler = xBusy;
   db->busyHandler.pBusyArg = pArg;
@@ -1758,12 +1758,12 @@ void sqlite3_progress_handler(
   int (*xProgress)(void*),
   void *pArg
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   if( nOps>0 ){
     db->xProgress = xProgress;
@@ -1784,9 +1784,9 @@ void sqlite3_progress_handler(
 ** specified number of milliseconds before returning 0.
 */
 int sqlite3_busy_timeout(sqlite3 *db, int ms){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   if( ms>0 ){
     sqlite3_busy_handler(db, (int(*)(void*,int))sqliteDefaultBusyCallback,
                              (void*)db);
@@ -1801,14 +1801,14 @@ int sqlite3_busy_timeout(sqlite3 *db, int ms){
 ** Cause any pending operation to stop at its earliest opportunity.
 */
 void sqlite3_interrupt(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db)
    && (db==0 || db->eOpenState!=SQLITE_STATE_ZOMBIE)
   ){
     (void)SQLITE_MISUSE_BKPT;
     return;
   }
-#endif
+}
   AtomicStore(&db->u1.isInterrupted, 1);
 }
 
@@ -1817,14 +1817,14 @@ void sqlite3_interrupt(sqlite3 *db){
 ** pending on connection db.
 */
 int sqlite3_is_interrupted(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db)
    && (db==0 || db->eOpenState!=SQLITE_STATE_ZOMBIE)
   ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   return AtomicLoad(&db->u1.isInterrupted)!=0;
 }
 
@@ -1984,11 +1984,11 @@ static int createFunctionApi(
   int rc = SQLITE_ERROR;
   FuncDestructor *pArg = 0;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   if( xDestroy ){
     pArg = (FuncDestructor *)sqlite3Malloc(sizeof(FuncDestructor));
@@ -2076,9 +2076,9 @@ int sqlite3_create_function16(
   int rc;
   char *zFunc8;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) || zFunctionName==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   assert( !db->mallocFailed );
   zFunc8 = sqlite3Utf16to8(db, zFunctionName, -1, SQLITE_UTF16NATIVE);
@@ -2133,11 +2133,11 @@ int sqlite3_overload_function(
   int rc;
   char *zCopy;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) || zName==0 || nArg<-2 ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   rc = sqlite3FindFunction(db, zName, nArg, SQLITE_UTF8, 0)!=0;
   sqlite3_mutex_leave(db->mutex);
@@ -2161,12 +2161,12 @@ int sqlite3_overload_function(
 void *sqlite3_trace(sqlite3 *db, void(*xTrace)(void*,const char*), void *pArg){
   void *pOld;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pOld = db->pTraceArg;
   db->mTrace = xTrace ? SQLITE_TRACE_LEGACY : 0;
@@ -2185,11 +2185,11 @@ int sqlite3_trace_v2(
   int(*xTrace)(unsigned,void*,void*,void*),  /* Callback to invoke */
   void *pArg                                 /* Context */
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   if( mTrace==0 ) xTrace = 0;
   if( xTrace==0 ) mTrace = 0;
@@ -2216,12 +2216,12 @@ void *sqlite3_profile(
 ){
   void *pOld;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pOld = db->pProfileArg;
   db->xProfile = xProfile;
@@ -2246,12 +2246,12 @@ void *sqlite3_commit_hook(
 ){
   void *pOld;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pOld = db->pCommitArg;
   db->xCommitCallback = xCallback;
@@ -2271,12 +2271,12 @@ void *sqlite3_update_hook(
 ){
   void *pRet;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pRet = db->pUpdateArg;
   db->xUpdateCallback = xCallback;
@@ -2296,12 +2296,12 @@ void *sqlite3_rollback_hook(
 ){
   void *pRet;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pRet = db->pRollbackArg;
   db->xRollbackCallback = xCallback;
@@ -2341,12 +2341,12 @@ int sqlite3_autovacuum_pages(
   void *pArg,                  /* Argument to the function */
   void (*xDestructor)(void*)   /* Destructor for pArg */
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     if( xDestructor ) xDestructor(pArg);
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   if( db->xAutovacDestr ){
     db->xAutovacDestr(db->pAutovacPagesArg);
@@ -2397,9 +2397,9 @@ int sqlite3_wal_autocheckpoint(sqlite3 *db, int nFrame){
   UNUSED_PARAMETER(db);
   UNUSED_PARAMETER(nFrame);
 #else
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   if( nFrame>0 ){
     sqlite3_wal_hook(db, sqlite3WalDefaultHook, SQLITE_INT_TO_PTR(nFrame));
   }else{
@@ -2420,12 +2420,12 @@ void *sqlite3_wal_hook(
 ){
 #ifndef SQLITE_OMIT_WAL
   void *pRet;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pRet = db->pWalArg;
   db->xWalCallback = xCallback;
@@ -2453,9 +2453,9 @@ int sqlite3_wal_checkpoint_v2(
   int rc;                         /* Return code */
   int iDb;                        /* Schema to checkpoint */
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
 
   /* Initialize the output variables to -1 in case an error occurs. */
   if( pnLog ) *pnLog = -1;
@@ -2859,12 +2859,12 @@ static const int aHardLimit[] = {
 int sqlite3_limit(sqlite3 *db, int limitId, int newLimit){
   int oldLimit;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return -1;
   }
-#endif
+}
 
   /* EVIDENCE-OF: R-30189-54097 For each limit category SQLITE_LIMIT_NAME
   ** there is a hard upper bound set at compile-time by a C preprocessor
@@ -3196,9 +3196,9 @@ static int openDatabase(
   char *zErrMsg = 0;              /* Error message from sqlite3ParseUri() */
   int i;                          /* Loop counter */
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( ppDb==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   *ppDb = 0;
 #ifndef SQLITE_OMIT_AUTOINIT
   rc = sqlite3_initialize();
@@ -3568,9 +3568,9 @@ int sqlite3_open16(
   sqlite3_value *pVal;
   int rc;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( ppDb==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   *ppDb = 0;
 #ifndef SQLITE_OMIT_AUTOINIT
   rc = sqlite3_initialize();
@@ -3622,9 +3622,9 @@ int sqlite3_create_collation_v2(
 ){
   int rc;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) || zName==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   assert( !db->mallocFailed );
   rc = createCollation(db, zName, (u8)enc, pCtx, xCompare, xDel);
@@ -3647,9 +3647,9 @@ int sqlite3_create_collation16(
   int rc = SQLITE_OK;
   char *zName8;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) || zName==0 ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   assert( !db->mallocFailed );
   zName8 = sqlite3Utf16to8(db, zName, -1, SQLITE_UTF16NATIVE);
@@ -3672,9 +3672,9 @@ int sqlite3_collation_needed(
   void *pCollNeededArg,
   void(*xCollNeeded)(void*,sqlite3*,int eTextRep,const char*)
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   db->xCollNeeded = xCollNeeded;
   db->xCollNeeded16 = 0;
@@ -3693,9 +3693,9 @@ int sqlite3_collation_needed16(
   void *pCollNeededArg,
   void(*xCollNeeded16)(void*,sqlite3*,int eTextRep,const void*)
 ){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   db->xCollNeeded = 0;
   db->xCollNeeded16 = xCollNeeded16;
@@ -3722,12 +3722,12 @@ int sqlite3_global_recover(void){
 ** by the next COMMIT or ROLLBACK.
 */
 int sqlite3_get_autocommit(sqlite3 *db){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   return db->autoCommit;
 }
 
@@ -3817,11 +3817,11 @@ int sqlite3_table_column_metadata(
   int autoinc = 0;
 
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) || zTableName==0 ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
 
   /* Ensure the database schema has been loaded */
   sqlite3_mutex_enter(db->mutex);
@@ -3929,9 +3929,9 @@ int sqlite3_sleep(int ms){
 ** Enable or disable the extended result codes.
 */
 int sqlite3_extended_result_codes(sqlite3 *db, int onoff){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   db->errMask = onoff ? 0xffffffff : 0xff;
   sqlite3_mutex_leave(db->mutex);
@@ -3945,9 +3945,9 @@ int sqlite3_file_control(sqlite3 *db, const char *zDbName, int op, void *pArg){
   int rc = SQLITE_ERROR;
   Btree *pBtree;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ) return SQLITE_MISUSE_BKPT;
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   pBtree = sqlite3DbNameToBtree(db, zDbName);
   if( pBtree ){
@@ -4686,12 +4686,12 @@ Btree *sqlite3DbNameToBtree(sqlite3 *db, const char *zDbName){
 ** of range.
 */
 const char *sqlite3_db_name(sqlite3 *db, int N){
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   if( N<0 || N>=db->nDb ){
     return 0;
   }else{
@@ -4705,12 +4705,12 @@ const char *sqlite3_db_name(sqlite3 *db, int N){
 */
 const char *sqlite3_db_filename(sqlite3 *db, const char *zDbName){
   Btree *pBt;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
   pBt = sqlite3DbNameToBtree(db, zDbName);
   return pBt ? sqlite3BtreeGetFilename(pBt) : 0;
 }
@@ -4721,12 +4721,12 @@ const char *sqlite3_db_filename(sqlite3 *db, const char *zDbName){
 */
 int sqlite3_db_readonly(sqlite3 *db, const char *zDbName){
   Btree *pBt;
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     (void)SQLITE_MISUSE_BKPT;
     return -1;
   }
-#endif
+}
   pBt = sqlite3DbNameToBtree(db, zDbName);
   return pBt ? sqlite3BtreeIsReadonly(pBt) : -1;
 }
@@ -4744,11 +4744,11 @@ int sqlite3_snapshot_get(
   int rc = SQLITE_ERROR;
 #ifndef SQLITE_OMIT_WAL
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
 
   if( db->autoCommit==0 ){
@@ -4780,11 +4780,11 @@ int sqlite3_snapshot_open(
   int rc = SQLITE_ERROR;
 #ifndef SQLITE_OMIT_WAL
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
   sqlite3_mutex_enter(db->mutex);
   if( db->autoCommit==0 ){
     int iDb;
@@ -4833,11 +4833,11 @@ int sqlite3_snapshot_recover(sqlite3 *db, const char *zDb){
 #ifndef SQLITE_OMIT_WAL
   int iDb;
 
-#ifdef SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( !sqlite3SafetyCheckOk(db) ){
     return SQLITE_MISUSE_BKPT;
   }
-#endif
+}
 
   sqlite3_mutex_enter(db->mutex);
   iDb = sqlite3FindDbName(db, zDb);
@@ -4877,12 +4877,12 @@ int sqlite3_compileoption_used(const char *zOptName){
   int nOpt;
   const char **azCompileOpt;
 
-#if SQLITE_ENABLE_API_ARMOR
+if (getenv("SQLITE_ENABLE_API_ARMOR")){
   if( zOptName==0 ){
     (void)SQLITE_MISUSE_BKPT;
     return 0;
   }
-#endif
+}
 
   azCompileOpt = sqlite3CompileOptions(&nOpt);
 
