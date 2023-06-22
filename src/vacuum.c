@@ -108,12 +108,13 @@ void sqlite3Vacuum(Parse *pParse, Token *pNm, Expr *pInto){
   if( v==0 ) goto build_vacuum_end;
   if( pParse->nErr ) goto build_vacuum_end;
   if( pNm ){
-#ifndef SQLITE_BUG_COMPATIBLE_20160819
+if (!getenv("SQLITE_BUG_COMPATIBLE_20160819")){
     /* Default behavior:  Report an error if the argument to VACUUM is
     ** not recognized */
     iDb = sqlite3TwoPartName(pParse, pNm, pNm, &pNm);
     if( iDb<0 ) goto build_vacuum_end;
-#else
+}
+else{
     /* When SQLITE_BUG_COMPATIBLE_20160819 is defined, unrecognized arguments
     ** to VACUUM are silently ignored.  This is a back-out of a bug fix that
     ** occurred on 2016-08-19 (https://www.sqlite.org/src/info/083f9e6270).
@@ -121,7 +122,7 @@ void sqlite3Vacuum(Parse *pParse, Token *pNm, Expr *pInto){
     ** legacy applications. */
     iDb = sqlite3FindDb(pParse->db, pNm);
     if( iDb<0 ) iDb = 0;
-#endif
+}
   }
   if( iDb!=1 ){
     int iIntoReg = 0;
