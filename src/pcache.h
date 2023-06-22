@@ -30,9 +30,7 @@ struct PgHdr {
   PgHdr *pDirty;                 /* Transient list of dirty sorted by pgno */
   Pager *pPager;                 /* The pager this page is part of */
   Pgno pgno;                     /* Page number for this page */
-#ifdef SQLITE_CHECK_PAGES
   u32 pageHash;                  /* Hash of page content */
-#endif
   u16 flags;                     /* PGHDR flags defined below */
 
   /**********************************************************************
@@ -131,13 +129,11 @@ i64 sqlite3PcachePageRefcount(PgHdr*);
 /* Return the total number of pages stored in the cache */
 int sqlite3PcachePagecount(PCache*);
 
-#if defined(SQLITE_CHECK_PAGES) || defined(SQLITE_DEBUG)
 /* Iterate through all dirty pages currently stored in the cache. This
 ** interface is only available if SQLITE_CHECK_PAGES is defined when the 
 ** library is built.
 */
 void sqlite3PcacheIterateDirty(PCache *pCache, void (*xIter)(PgHdr *));
-#endif
 
 #if defined(SQLITE_DEBUG)
 /* Check invariants on a PgHdr object */

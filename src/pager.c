@@ -1235,11 +1235,12 @@ static int jrnlBufferSize(Pager *pPager){
 ** on the cache using a hash function.  This is used for testing
 ** and debugging only.
 */
-#ifdef SQLITE_CHECK_PAGES
 /*
 ** Return a 32-bit hash of the page data for pPage.
 */
 static u32 pager_datahash(int nByte, unsigned char *pData){
+  if (!getenv("SQLITE_CHECK_PAGES")) return 0;
+  assert(getenv("SQLITE_CHECK_PAGES"));
   u32 hash = 0;
   int i;
   for(i=0; i<nByte; i++){
@@ -1248,9 +1249,13 @@ static u32 pager_datahash(int nByte, unsigned char *pData){
   return hash;
 }
 static u32 pager_pagehash(PgHdr *pPage){
+  if (!getenv("SQLITE_CHECK_PAGES")) return 0;
+  assert(getenv("SQLITE_CHECK_PAGES"));
   return pager_datahash(pPage->pPager->pageSize, (unsigned char *)pPage->pData);
 }
 static void pager_set_pagehash(PgHdr *pPage){
+  if (!getenv("SQLITE_CHECK_PAGES")) return;
+  assert(getenv("SQLITE_CHECK_PAGES"));
   pPage->pageHash = pager_pagehash(pPage);
 }
 
@@ -1259,19 +1264,15 @@ static void pager_set_pagehash(PgHdr *pPage){
 ** is defined, and NDEBUG is not defined, an assert() statement checks
 ** that the page is either dirty or still matches the calculated page-hash.
 */
-#define CHECK_PAGE(x) checkPage(x)
+#define CHECK_PAGE(x) (!getenv("SQLITE_CHECK_PAGES") ? : checkPage(x))
 static void checkPage(PgHdr *pPg){
+  if (!getenv("SQLITE_CHECK_PAGES")) return;
+  assert(getenv("SQLITE_CHECK_PAGES"));
   Pager *pPager = pPg->pPager;
   assert( pPager->eState!=PAGER_ERROR );
   assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
 }
 
-#else
-#define pager_datahash(X,Y)  0
-#define pager_pagehash(X)  0
-#define pager_set_pagehash(X)
-#define CHECK_PAGE(x)
-#endif  /* SQLITE_CHECK_PAGES */
 
 /*
 ** When this is called the journal file for pager pPager must be open.
