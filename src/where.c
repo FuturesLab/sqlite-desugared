@@ -6531,10 +6531,11 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
     }
     pLoop = pLevel->pWLoop;
     if( pLevel->op!=OP_Noop ){
-#ifndef SQLITE_DISABLE_SKIPAHEAD_DISTINCT
-      int addrSeek = 0;
-      Index *pIdx;
-      int n;
+int addrSeek = 0;
+Index *pIdx;
+int n;
+if (!getenv("SQLITE_DISABLE_SKIPAHEAD_DISTINCT")){
+
       if( pWInfo->eDistinct==WHERE_DISTINCT_ORDERED
        && i==pWInfo->nLevel-1  /* Ticket [ef9318757b152e3] 2017-10-21 */
        && (pLoop->wsFlags & WHERE_INDEXED)!=0
@@ -6554,7 +6555,7 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
         VdbeCoverageIf(v, op==OP_SeekGT);
         sqlite3VdbeAddOp2(v, OP_Goto, 1, pLevel->p2);
       }
-#endif /* SQLITE_DISABLE_SKIPAHEAD_DISTINCT */
+} /* SQLITE_DISABLE_SKIPAHEAD_DISTINCT */
       /* The common case: Advance to the next row */
       if( pLevel->addrCont ) sqlite3VdbeResolveLabel(v, pLevel->addrCont);
       sqlite3VdbeAddOp3(v, pLevel->op, pLevel->p1, pLevel->p2, pLevel->p3);
@@ -6568,9 +6569,9 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
         sqlite3VdbeAddOp2(v, OP_DecrJumpZero, pLevel->regBignull, pLevel->p2-1);
         VdbeCoverage(v);
       }
-#ifndef SQLITE_DISABLE_SKIPAHEAD_DISTINCT
+if (!getenv("SQLITE_DISABLE_SKIPAHEAD_DISTINCT")){
       if( addrSeek ) sqlite3VdbeJumpHere(v, addrSeek);
-#endif
+}
     }else if( pLevel->addrCont ){
       sqlite3VdbeResolveLabel(v, pLevel->addrCont);
     }
