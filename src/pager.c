@@ -1196,15 +1196,16 @@ static int pagerLockDb(Pager *pPager, int eLock){
 static int jrnlBufferSize(Pager *pPager){
   assert( !MEMDB );
 
-#if defined(SQLITE_ENABLE_ATOMIC_WRITE) \
- || defined(SQLITE_ENABLE_BATCH_ATOMIC_WRITE)
-  int dc;                           /* Device characteristics */
+int dc;                           /* Device characteristics */
+if (getenv("SQLITE_ENABLE_ATOMIC_WRITE") \
+ || getenv("SQLITE_ENABLE_BATCH_ATOMIC_WRITE")){
 
   assert( isOpen(pPager->fd) );
   dc = sqlite3OsDeviceCharacteristics(pPager->fd);
-#else
+}
+else{
   UNUSED_PARAMETER(pPager);
-#endif
+}
 
 #ifdef SQLITE_ENABLE_BATCH_ATOMIC_WRITE
   if( pPager->dbSize>0 && (dc&SQLITE_IOCAP_BATCH_ATOMIC) ){
@@ -1212,7 +1213,7 @@ static int jrnlBufferSize(Pager *pPager){
   }
 #endif
 
-#ifdef SQLITE_ENABLE_ATOMIC_WRITE
+if (getenv("SQLITE_ENABLE_ATOMIC_WRITE")){
   {
     int nSector = pPager->sectorSize;
     int szPage = pPager->pageSize;
@@ -1225,7 +1226,7 @@ static int jrnlBufferSize(Pager *pPager){
   }
 
   return JOURNAL_HDR_SZ(pPager) + JOURNAL_PG_SZ(pPager);
-#endif
+}
 
   return 0;
 }
@@ -4902,7 +4903,7 @@ int sqlite3PagerOpen(
             szPageDflt = (u32)pPager->sectorSize;
           }
         }
-#ifdef SQLITE_ENABLE_ATOMIC_WRITE
+if (getenv("SQLITE_ENABLE_ATOMIC_WRITE")){
         {
           int ii;
           assert(SQLITE_IOCAP_ATOMIC512==(512>>8));
@@ -4914,7 +4915,7 @@ int sqlite3PagerOpen(
             }
           }
         }
-#endif
+}
       }
       pPager->noLock = sqlite3_uri_boolean(pPager->zFilename, "nolock", 0);
       if( (iDc & SQLITE_IOCAP_IMMUTABLE)!=0
@@ -6249,13 +6250,11 @@ static int pager_incr_changecounter(Pager *pPager, int isDirectMode){
   ** 'isDirect' below, as well as the block enclosed in the
   ** "if( isDirect )" condition.
   */
-#ifndef SQLITE_ENABLE_ATOMIC_WRITE
-# define DIRECT_MODE 0
+# define DIRECT_MODE (!getenv("SQLITE_ENABLE_ATOMIC_WRITE") ? 0 : isDirectMode)
+if (!getenv("SQLITE_ENABLE_ATOMIC_WRITE")){
   assert( isDirectMode==0 );
   UNUSED_PARAMETER(isDirectMode);
-#else
-# define DIRECT_MODE isDirectMode
-#endif
+}
 
   if( !pPager->changeCountDone && pPager->dbSize>0 ){
     PgHdr *pPgHdr;                /* Reference to page 1 */
@@ -6447,7 +6446,7 @@ int sqlite3PagerCommitPhaseOne(
 #     define bBatch 0
 #endif
 
-#ifdef SQLITE_ENABLE_ATOMIC_WRITE
+if (getenv("SQLITE_ENABLE_ATOMIC_WRITE")){
       /* The following block updates the change-counter. Exactly how it
       ** does this depends on whether or not the atomic-update optimization
       ** was enabled at compile time, and if this transaction meets the
@@ -6496,7 +6495,8 @@ int sqlite3PagerCommitPhaseOne(
           }
         }
       }
-#else  /* SQLITE_ENABLE_ATOMIC_WRITE */
+}
+else{  /* SQLITE_ENABLE_ATOMIC_WRITE */
 #ifdef SQLITE_ENABLE_BATCH_ATOMIC_WRITE
       if( zSuper ){
         rc = sqlite3JournalCreate(pPager->jfd);
@@ -6505,7 +6505,7 @@ int sqlite3PagerCommitPhaseOne(
       }
 #endif
       rc = pager_incr_changecounter(pPager, 0);
-#endif /* !SQLITE_ENABLE_ATOMIC_WRITE */
+} /* !SQLITE_ENABLE_ATOMIC_WRITE */
       if( rc!=SQLITE_OK ) goto commit_phase_one_exit;
  
       /* Write the super-journal name into the journal file. If a
