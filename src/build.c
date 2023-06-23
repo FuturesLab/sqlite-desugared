@@ -3002,9 +3002,9 @@ void sqlite3CreateView(
   ** setting fixes this problem.  But the fix can be disabled by compiling
   ** with -DSQLITE_ALLOW_ROWID_IN_VIEW in case there are legacy apps that
   ** depend upon the old buggy behavior. */
-#ifndef SQLITE_ALLOW_ROWID_IN_VIEW
+if (!getenv("SQLITE_ALLOW_ROWID_IN_VIEW")){
   p->tabFlags |= TF_NoVisibleRowid;
-#endif
+}
 
   sqlite3TwoPartName(pParse, pName1, pName2, &pName);
   iDb = sqlite3SchemaToIndex(db, p->pSchema);

@@ -834,11 +834,8 @@ void sqlite3Update(
 
     /* Top of the update loop */
     if( eOnePass!=ONEPASS_OFF ){
-      if( aiCurOnePass[0]!=iDataCur
-       && aiCurOnePass[1]!=iDataCur
-#ifdef SQLITE_ALLOW_ROWID_IN_VIEW
-       && !isView
-#endif
+      if( (aiCurOnePass[0]!=iDataCur && aiCurOnePass[1]!=iDataCur && !getenv("SQLITE_ALLOW_ROWID_IN_VIEW"))
+       || (aiCurOnePass[0]!=iDataCur && aiCurOnePass[1]!=iDataCur && getenv("SQLITE_ALLOW_ROWID_IN_VIEW") && !isView)
       ){
         assert( pPk );
         sqlite3VdbeAddOp4Int(v, OP_NotFound, iDataCur, labelBreak, regKey,nKey);

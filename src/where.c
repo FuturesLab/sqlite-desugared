@@ -686,12 +686,12 @@ static void translateColumnToCopy(
     }else if( pOp->opcode==OP_Rowid ){
       pOp->opcode = OP_Sequence;
       pOp->p1 = iAutoidxCur;
-#ifdef SQLITE_ALLOW_ROWID_IN_VIEW
+if (getenv("SQLITE_ALLOW_ROWID_IN_VIEW")){
       if( iAutoidxCur==0 ){
         pOp->opcode = OP_Null;
         pOp->p3 = 0;
       }
-#endif
+}
     }
   }
 }

@@ -1938,12 +1938,8 @@ static const char *columnTypeImpl(
         ** of the SELECT statement. Return the declaration type and origin
         ** data for the result-set column of the sub-select.
         */
-        if( iCol<pS->pEList->nExpr
-#ifdef SQLITE_ALLOW_ROWID_IN_VIEW
-         && iCol>=0
-#else
-         && ALWAYS(iCol>=0)
-#endif
+        if( (iCol<pS->pEList->nExpr && !getenv("SQLITE_ALLOW_ROWID_IN_VIEW") && ALWAYS(iCol>=0))
+         || (iCol<pS->pEList->nExpr && getenv("SQLITE_ALLOW_ROWID_IN_VIEW") && iCol>=0)
         ){
           /* If iCol is less than zero, then the expression requests the
           ** rowid of the sub-select or view. This expression is legal (see
@@ -3844,11 +3840,9 @@ static Expr *substExpr(
    && pExpr->iTable==pSubst->iTable
    && !ExprHasProperty(pExpr, EP_FixedCol)
   ){
-#ifdef SQLITE_ALLOW_ROWID_IN_VIEW
-    if( pExpr->iColumn<0 ){
+    if( getenv("SQLITE_ALLOW_ROWID_IN_VIEW") && pExpr->iColumn<0 ){
       pExpr->op = TK_NULL;
     }else
-#endif
     {
       Expr *pNew;
       int iColumn;
@@ -5867,12 +5861,13 @@ int sqlite3ExpandSubquery(Parse *pParse, SrcItem *pFrom){
   sqlite3ColumnsFromExprList(pParse, pSel->pEList,&pTab->nCol,&pTab->aCol);
   pTab->iPKey = -1;
   pTab->nRowLogEst = 200; assert( 200==sqlite3LogEst(1048576) );
-#ifndef SQLITE_ALLOW_ROWID_IN_VIEW
+if (!getenv("SQLITE_ALLOW_ROWID_IN_VIEW")){
   /* The usual case - do not allow ROWID on a subquery */
   pTab->tabFlags |= TF_Ephemeral | TF_NoVisibleRowid;
-#else
+}
+else {
   pTab->tabFlags |= TF_Ephemeral;  /* Legacy compatibility mode */
-#endif
+}
   return pParse->nErr ? SQLITE_ERROR : SQLITE_OK;
 }
 
